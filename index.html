@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Chimera File Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="header">
+        <h1>Chimera File Manager</h1>
+        <p id="path-display">/Initializing...</p>
+    </div>
+
+    <div id="loader" class="visible">
+        <div class="spinner"></div>
+        <p>Connecting to device...</p>
+    </div>
+
+    <div id="file-list">
+        <!-- File and folder items will be inserted here by JavaScript -->
+    </div>
+
+    <div id="footer">
+        <button id="action-button">Initialize</button>
+    </div>
+
+    <!-- Telegram Web App Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Your Custom Script -->
+    <script src="script.js"></script>
+</body>
+</html>
