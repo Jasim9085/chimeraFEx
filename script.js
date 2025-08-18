@@ -20,7 +20,11 @@ window.addEventListener('load', function() {
         fileList.innerHTML = '';
         
         if (data.error) {
-            showInitialScreen(data.error);
+            if (data.error === "grant_needed") {
+                showInitialScreen("Storage access has not been granted on the device. Please request it.");
+            } else {
+                showInitialScreen(data.error);
+            }
             return;
         }
 
@@ -36,18 +40,7 @@ window.addEventListener('load', function() {
         data.items.forEach(item => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'item';
-            
-            const iconSpan = document.createElement('span');
-            iconSpan.className = 'item-icon';
-            iconSpan.textContent = item.type === 'folder' ? '📁' : '📄';
-
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'item-name';
-            nameSpan.textContent = item.name;
-
-            itemDiv.appendChild(iconSpan);
-            itemDiv.appendChild(nameSpan);
-
+            itemDiv.innerHTML = `<span class="item-icon">${item.type === 'folder' ? '📁' : '📄'}</span><span class="item-name">${item.name}</span>`;
             itemDiv.addEventListener('click', () => handleItemClick(item));
             fileList.appendChild(itemDiv);
         });
@@ -59,8 +52,9 @@ window.addEventListener('load', function() {
     
     function handleItemClick(item) {
         if (item.type === 'folder') {
-            showLoader();
+            showLoader("Loading folder...");
             sendBotCommand('fm_list_files', { uri: item.uri });
+            tg.close();
         } else {
             tg.showPopup({
                 title: item.name,
@@ -72,14 +66,14 @@ window.addEventListener('load', function() {
                 ]
             }, (buttonId) => {
                 if (buttonId === 'download') {
-                    tg.MainButton.setText('Requesting Download...').show().disable();
                     sendBotCommand('fm_download_file', { uri: item.uri });
-                    setTimeout(() => tg.MainButton.hide(), 2000);
+                    tg.showAlert('Download request sent to the device.');
                 } else if (buttonId === 'delete') {
                     tg.showConfirm(`Are you sure you want to delete "${item.name}"?`, (confirmed) => {
                         if (confirmed) {
-                            showLoader();
+                            showLoader("Deleting file...");
                             sendBotCommand('fm_delete_file', { uri: item.uri });
+                            tg.close();
                         }
                     });
                 }
@@ -103,11 +97,13 @@ window.addEventListener('load', function() {
             }
         } else {
             sendBotCommand('fm_init');
+            tg.close();
         }
     }
     
-    function showLoader() {
+    function showLoader(message = "Connecting to device...") {
         loader.classList.remove('hidden');
+        loader.querySelector('p').textContent = message;
         fileList.classList.add('hidden');
         initialScreen.classList.add('hidden');
         footer.classList.add('hidden');
@@ -129,8 +125,9 @@ window.addEventListener('load', function() {
     upButton.addEventListener('click', () => {
         const parentUri = upButton.dataset.uri;
         if (parentUri) {
-            showLoader();
+            showLoader("Loading parent directory...");
             sendBotCommand('fm_list_files', { uri: parentUri });
+            tg.close();
         }
     });
 
